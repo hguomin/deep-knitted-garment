@@ -1,0 +1,6 @@
+[submodule "libs/human-pose-estimation.pytorch"]
+	path = libs/human-pose-estimation.pytorch
+	url = https://github.com/hguomin/human-pose-estimation.pytorch.git
+[submodule "libs/MeshTransformer"]
+	path = libs/MeshTransformer
+	url = https://github.com/hguomin/MeshTransformer.git
