@@ -5,11 +5,119 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Train on 3dpw",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/metro/tools/run_metro_bodymesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--train_yaml", "3dpw/train.yaml",
+                "--val_yaml", "3dpw/test_has_gender.yaml",
+                "--arch", "hrnet-w64",
+                "--num_workers", "4",
+                "--per_gpu_train_batch_size", "10",  //reduce GPU memory usage by decreasing batch size
+                "--per_gpu_eval_batch_size", "10",
+                "--num_hidden_layers", "4",
+                "--num_attention_heads", "4",
+                "--lr", "1e-4",
+                "--num_train_epochs", "15", //increase this value will produce better model
+                "--input_feat_dim", "2051,512,128",
+                "--hidden_feat_dim", "1024,256,128",
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}",
+            }  
+        },
+        {
+            "name": "Python: Train on BCNet dataset",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/metro/tools/run_metro_bodymesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--train_yaml", "bcnet/train.yaml",
+                "--val_yaml", "bcnet/test.yaml",
+                "--resume_checkpoint", "./output/checkpoint-8-113584/state_dict.bin",
+                "--arch", "hrnet-w64",
+                "--num_workers", "4",
+                "--logging_steps", "100",
+                "--per_gpu_train_batch_size", "10",  //reduce GPU memory usage by decreasing batch size
+                "--per_gpu_eval_batch_size", "10",
+                "--num_hidden_layers", "4",
+                "--num_attention_heads", "4",
+                "--lr", "1e-4",
+                "--num_train_epochs", "15", //increase this value will produce better model
+                "--input_feat_dim", "2051,512,128",
+                "--hidden_feat_dim", "1024,256,128",
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}",
+            }  
+        },
+        {
+            "name": "Python: Garment Simulation",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/deep-knitted-garment/garment-simulation.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}",
+            }  
+        },
+        {
+            "name": "Python: Metro Quick Demo",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/libs/MeshTransformer/metro/tools/end2end_inference_bodymesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resume_checkpoint",
+                "./models/metro_release/metro_3dpw_state_dict.bin",
+                "--image_file_or_path",
+                "./samples/human-body"
+            ],
+            "cwd": "${workspaceFolder}/libs/MeshTransformer",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Python: Quick Demo for BCNet",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/metro/tools/end2end_inference_bodymesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resume_checkpoint",
+                "./output/checkpoint-5-70990/state_dict.bin",
+                "--image_file_or_path",
+                "./samples/human-body"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}"
+            }
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}"
+            }
         }
     ]
 }

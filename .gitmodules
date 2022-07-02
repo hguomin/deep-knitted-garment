@@ -4,3 +4,13 @@
 [submodule "libs/MeshTransformer"]
 	path = libs/MeshTransformer
 	url = https://github.com/hguomin/MeshTransformer.git
+[submodule "libs/apex"]
+	path = libs/apex
+	url = https://github.com/NVIDIA/apex
+
+[submodule "libs/deep-high-resolution-net.pytorch"]
+	path = libs/deep-high-resolution-net.pytorch
+	url = https://github.com/hguomin/deep-high-resolution-net.pytorch
+[submodule "libs/cocoapi"]
+	path = libs/cocoapi
+	url = https://github.com/cocodataset/cocoapi.git
