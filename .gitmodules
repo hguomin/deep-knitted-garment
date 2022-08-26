@@ -14,3 +14,6 @@
 [submodule "libs/cocoapi"]
 	path = libs/cocoapi
 	url = https://github.com/cocodataset/cocoapi.git
+[submodule "libs/coma.pythorch"]
+	path = libs/coma.pythorch
+	url = https://github.com/hguomin/pytorch_coma.git

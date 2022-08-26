@@ -8,7 +8,7 @@
             "name": "Python: Train on 3dpw",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/metro/tools/run_metro_bodymesh.py",
+            "program": "${workspaceFolder}/libs/MeshTransformer/metro/tools/run_metro_bodymesh.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
@@ -16,8 +16,8 @@
                 "--val_yaml", "3dpw/test_has_gender.yaml",
                 "--arch", "hrnet-w64",
                 "--num_workers", "4",
-                "--per_gpu_train_batch_size", "10",  //reduce GPU memory usage by decreasing batch size
-                "--per_gpu_eval_batch_size", "10",
+                "--per_gpu_train_batch_size", "5",  //reduce GPU memory usage by decreasing batch size
+                "--per_gpu_eval_batch_size", "5",
                 "--num_hidden_layers", "4",
                 "--num_attention_heads", "4",
                 "--lr", "1e-4",
@@ -25,22 +25,53 @@
                 "--input_feat_dim", "2051,512,128",
                 "--hidden_feat_dim", "1024,256,128",
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/libs/MeshTransformer",
             "env": {
-                "PYTHON_PATH": "${workspaceFolder}",
+                "PYTHON_PATH": "${workspaceFolder}/libs/MeshTransformer",
+                "CUDA_LAUNCH_BLOCKING": "1"
             }  
         },
         {
             "name": "Python: Train on BCNet dataset",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/metro/tools/run_metro_bodymesh.py",
+            "program": "${workspaceFolder}/libs/MeshTransformer/metro/tools/run_metro_bodymesh.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
                 "--train_yaml", "bcnet/train.yaml",
                 "--val_yaml", "bcnet/test.yaml",
-                "--resume_checkpoint", "./output/checkpoint-8-113584/state_dict.bin",
+                //"--resume_checkpoint", "./output/checkpoint-8-113584/state_dict.bin",
+                "--arch", "hrnet-w64",
+                "--num_workers", "4",
+                "--logging_steps", "100",
+                "--per_gpu_train_batch_size", "5",  //reduce GPU memory usage by decreasing batch size
+                "--per_gpu_eval_batch_size", "5",
+                "--num_hidden_layers", "4",
+                "--num_attention_heads", "4",
+                "--lr", "1e-4",
+                "--num_train_epochs", "15", //increase this value will produce better model
+                "--input_feat_dim", "2051,512,128",
+                "--hidden_feat_dim", "1024,256,128",
+                "--has_garment", "True"
+            ],
+            "cwd": "${workspaceFolder}/libs/MeshTransformer",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}/libs/MeshTransformer",
+                "CUDA_LAUNCH_BLOCKING": "1"
+            }  
+        },
+        {
+            "name": "Python: Train on UP-3D dataset",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/libs/MeshTransformer/metro/tools/run_metro_bodymesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--train_yaml", "up-3d_tsv/trainval.yaml",
+                "--val_yaml", "up-3d_tsv/trainval.yaml",
+                //"--resume_checkpoint", "./output/checkpoint-8-113584/state_dict.bin",
                 "--arch", "hrnet-w64",
                 "--num_workers", "4",
                 "--logging_steps", "100",
@@ -53,9 +84,9 @@
                 "--input_feat_dim", "2051,512,128",
                 "--hidden_feat_dim", "1024,256,128",
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/libs/MeshTransformer",
             "env": {
-                "PYTHON_PATH": "${workspaceFolder}",
+                "PYTHON_PATH": "${workspaceFolder}/libs/MeshTransformer",
             }  
         },
         {
@@ -103,6 +134,32 @@
                 "./samples/human-body"
             ],
             "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHON_PATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Python: Human Pose Estimation Demo",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/libs/deep-high-resolution-net.pytorch/demo/demo.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/libs/deep-high-resolution-net.pytorch",
+            "args": [
+                "--image", "demo/test.jpg",
+                "--showFps", "--write"
+            ],
+            "env": {}
+        },
+        {
+            "name": "Python: Metro Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/libs/MeshTransformer",
             "env": {
                 "PYTHON_PATH": "${workspaceFolder}"
             }

@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "",
+        "./libs/deep-high-resolution-net.pytorch/lib"
+    ],
+    "python.pythonPath": "/home/guomin/.conda/envs/metro/bin/python"
+}
