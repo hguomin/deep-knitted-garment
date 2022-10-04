@@ -111,6 +111,7 @@ class BCNetDataset(object):
         verts=(pca.reshape(1,-1)@self.gar_pca_datas[gartype][1] + self.gar_pca_datas[gartype][0].reshape(1,-1))
         return verts.reshape(-1,3)
     
+    #按服裝款式將圖片進行分類
     def classifyImagesByGarmentStyles(self):
         gar_data = {}
         for style in self.gar_styles:
@@ -368,8 +369,9 @@ class BCNetDataset(object):
         self.pre_process_dataset(catalog, 'test', test_set)
 
 def main_test():
-    dataset = BCNetDataset("/home/guomin/datadisk/Projects/Research/BCNet/body_garment_dataset")
-    dataset.pre_process('shirts', 20000)
+    #dataset = BCNetDataset("/home/guomin/datadisk/Projects/Research/BCNet/body_garment_dataset")
+    dataset = BCNetDataset("/media/guomin/Works/Projects/Research/1-BCNet/body_garment_dataset")
+    dataset.pre_process('shirts', 2000)
 
 if __name__ == "__main__":
     main_test()
