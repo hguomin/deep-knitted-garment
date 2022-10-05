@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Run Train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "train_example_220906", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256",
+                //"--pretrained_checkpoint=data/models/model_checkpoint_up3d_lsp_mpii_coco_220906.pt"
+            ]
+        },
+        {
+            "name": "Python: Run Train on BCNet dataset",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "train_example_220906", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet"
+                //"--pretrained_checkpoint=data/models/model_checkpoint_up3d_lsp_mpii_coco_220906.pt"
+            ]
+        },
+        {
+            "name": "Python: Preprocess datasets for training",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/preprocess_datasets.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--train_files"
+            ]
+        },
+        {
+            "name": "Python: Run Demo",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--checkpoint=data/models/model_checkpoint_h36m_up3d_extra2d.pt",
+                "--img=examples/im1010.jpg",
+                "--openpose=examples/im1010_openpose.json"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
