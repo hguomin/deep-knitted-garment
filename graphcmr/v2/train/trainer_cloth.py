@@ -9,12 +9,14 @@ from __future__ import division
 import torch
 import torch.nn as nn
 from torchvision.utils import make_grid
+from models.graph_cnn_cloth import ClothGraphCNN3
 
 from utils import BaseTrainer, Mesh, MeshSampler
 from datasets import create_dataset
-from models import ClothGraphCNN, SMPLParamRegressor, SMPL
+from models import ClothGraphCNN, ClothGraphCNN2, ClothGraphConvNetwork, ClothGraphConvNetwork_MLPDecoder, ClothGraphConvNetwork_MLPDecoder_Fusion, SMPLParamRegressor, SMPL, resnet50
 from models.geometric_layers import orthographic_projection, rodrigues
 from utils.renderer import Renderer, visualize_reconstruction, visualize_reconstructed_garment
+
 
 #Guomin
 import trimesh
@@ -38,19 +40,27 @@ class ClothTrainer(BaseTrainer):
             gar_sampling_params_file = osp.join(data_dir, 'tmps', self.options.garment, 'garment_mesh_sampling.npz')
             gar_mesh = trimesh.load(gar_temp_file)
             self.gar_mesh_sampler = MeshSampler(gar_mesh.vertices, gar_mesh.faces, gar_sampling_params_file)
+        
+        self.resnet = resnet50(pretrained=True).to(self.device)
+
         # create GraphCNN
-        self.graph_cnn = ClothGraphCNN(self.mesh.adjmat,
+        self.body_gcn = ClothGraphCNN3(self.mesh.adjmat,
                            self.mesh.ref_vertices.t(),
-                           self.gar_mesh_sampler,
                            num_channels=self.options.num_channels,
                            num_layers=self.options.num_layers
-                          ).to(self.device)
+                        ).to(self.device)
         
+        self.cloth_gcn = ClothGraphConvNetwork_MLPDecoder_Fusion(self.mesh.adjmat, self.gar_mesh_sampler,
+                           num_channels=self.options.num_channels,
+                           num_layers=self.options.num_layers
+                        ).to(self.device)
+
         # SMPL Parameter regressor
         self.smpl_param_regressor = SMPLParamRegressor().to(self.device)
 
-        # Setup a joint optimizer for the 2 models
-        self.optimizer = torch.optim.Adam(params=list(self.graph_cnn.parameters()) + list(self.smpl_param_regressor.parameters()),
+        # Setup a joint optimizer for the models
+        params=list(self.resnet.parameters()) + list(self.body_gcn.parameters()) + list(self.cloth_gcn.parameters()) + list(self.smpl_param_regressor.parameters())
+        self.optimizer = torch.optim.Adam( params=params,
                                            lr=self.options.lr,
                                            betas=(self.options.adam_beta1, 0.999),
                                            weight_decay=self.options.wd)
@@ -64,7 +74,7 @@ class ClothTrainer(BaseTrainer):
         self.criterion_regr = nn.MSELoss().to(self.device)
 
         # Pack models and optimizers in a dict - necessary for checkpointing
-        self.models_dict = {'graph_cnn': self.graph_cnn, 'smpl_param_regressor': self.smpl_param_regressor}
+        self.models_dict = {'resnet': self.resnet, 'body_gcn': self.body_gcn, 'cloth_gcn': self.cloth_gcn, 'smpl_param_regressor': self.smpl_param_regressor}
         self.optimizers_dict = {'optimizer': self.optimizer}
         
         # Renderer for visualization
@@ -131,7 +141,10 @@ class ClothTrainer(BaseTrainer):
 
     def train_step(self, input_batch):
         """Training step."""
-        self.graph_cnn.train()
+        # do we need resnet.train()? yes
+        self.resnet.train()
+        self.body_gcn.train()
+        self.cloth_gcn.train()
         self.smpl_param_regressor.train()
 
         # Grab data from the batch
@@ -155,15 +168,17 @@ class ClothTrainer(BaseTrainer):
         # human_mesh.export('/media/guomin/Works/Projects/Research/GraphCMR/GraphCMR/logs/human_mesh.obj')
 
         # Feed image in the GraphCNN
-        # Returns subsampled mesh and camera parameters
-        pred_vertices_sub, pred_camera, pred_gar_vertices_sub= self.graph_cnn(images)
-        
+        # Returns subsampled body mesh and camera parameters
+        images_resnet = self.resnet(images)
+        pred_vertices_sub, pred_camera = self.body_gcn(images_resnet)
+
         # Upsample mesh in the original size
         pred_vertices = self.mesh.upsample(pred_vertices_sub.transpose(1,2))
         
-        # Guomin
-        pred_gar_vertices = self.gar_mesh_sampler.upsample(pred_gar_vertices_sub.transpose(1,2))
-        #self.gar_mesh_sampler.save_mesh('/media/guomin/Works/Projects/Research/GraphCMR/GraphCMR/logs/gar_mesh.obj', pred_gar_vertices[0].detach())
+        # Guomin: Returns subsampled cloth mesh
+        #pred_gar_vertices_sub = self.cloth_gcn(images_resnet)
+        #pred_gar_vertices = self.gar_mesh_sampler.upsample(pred_gar_vertices_sub.transpose(1,2))
+        ##self.gar_mesh_sampler.save_mesh('/media/guomin/Works/Projects/Research/GraphCMR/GraphCMR/logs/gar_mesh.obj', pred_gar_vertices[0].detach())
         
         # Prepare input for SMPL Parameter regressor
         # The input is the predicted and template vertices subsampled by a factor of 4
@@ -179,6 +194,12 @@ class ClothTrainer(BaseTrainer):
         # Estimate SMPL parameters and render vertices
         pred_rotmat, pred_shape = self.smpl_param_regressor(x)
         pred_vertices_smpl = self.smpl(pred_rotmat, pred_shape)
+
+        # Guomin: use fusion networks to predict cloth mesh
+        body_vertices_smpl = pred_vertices_smpl.detach()
+        body_vertices_smpl_sub = self.mesh.downsample(body_vertices_smpl).transpose(1,2)
+        pred_gar_vertices_sub = self.cloth_gcn(images_resnet, body_vertices_smpl_sub, self.mesh.adjmat)
+        pred_gar_vertices = self.gar_mesh_sampler.upsample(pred_gar_vertices_sub.transpose(1,2))
 
         # Get 3D and projected 2D keypoints from the regressed shape
         pred_keypoints_3d = self.smpl.get_joints(pred_vertices)

@@ -25,7 +25,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--name", "train_example_220906", "--num_layers=5", 
+                "--name", "bcnet_train_mlp_as_decoder_221015", "--num_layers=5", 
                 "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet"
                 //"--pretrained_checkpoint=data/models/model_checkpoint_up3d_lsp_mpii_coco_220906.pt"
             ]

@@ -14,7 +14,7 @@ UPI_S1H_ROOT = './../datasets/up-3d/upi-s1h'
 MPII_ROOT = './../datasets/mpii'
 COCO_ROOT = './../datasets/coco'
 UP_3D_ROOT = './../datasets/up-3d/up-3d'
-BCNET_ROOT = './../../BCNet/body_garment_dataset'
+BCNET_ROOT = './../../../BCNet/body_garment_dataset'
 # Output folder to save test/train npz files
 DATASET_NPZ_PATH = 'datasets'
 
