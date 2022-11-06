@@ -13,6 +13,7 @@ from utils.mesh_sampler import MeshSampler
 
 from .graph_layers import GraphResBlock, GraphLinear
 from .resnet import resnet50
+from .layers import FCBlock, FCResBlock
 
 class ClothGraphCNN(nn.Module):
     
@@ -312,7 +313,10 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
         body_layers.append(GraphResBlock(2 * num_channels, num_channels, body_adjmat))
         for i in range(num_layers):
             body_layers.append(GraphResBlock(num_channels, num_channels, body_adjmat))
-        self.body_encoder = nn.Sequential(*body_layers)
+        self.body_gc = nn.Sequential(*body_layers)
+
+        # 1723 is the number of vertices in the subsampled SMPL mesh
+        self.body_encoder = nn.Sequential(FCBlock(1723 * 256, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, 256))
 
         # cloth encoder
         self.gar_ref_vertices = gar_mesh_sampler.ref_vertices.t()
@@ -322,6 +326,9 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
         for i in range(num_layers):
             gar_layers.append(GraphResBlock(num_channels, num_channels, self.gar_A))
         self.gar_gc = nn.Sequential(*gar_layers)
+
+        # 1723 is the number of vertices in the subsampled cloth mesh
+        self.gar_encoder = nn.Sequential(FCBlock(1062 * 256, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, 256))
 
         # cloth decoder
         #self.gar_shape = nn.Sequential(GraphResBlock(num_channels, 64, self.gar_A),
@@ -338,6 +345,13 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
                                    GraphLinear(32, 3),
                                    nn.Identity())
 
+        self.body_channels = 256
+        self.gar_channels = 256
+        # Fusion matrix
+        self.fm = nn.Parameter(torch.FloatTensor(self.body_channels, self.gar_channels))
+        w_stdv = 1 / (self.body_channels * self.gar_channels)
+        self.fm.data.uniform_(-w_stdv, w_stdv)
+
     def forward(self, image_resnet, body_vertices_sub=None, body_adjmat=None):
         """Forward pass
         Inputs:
@@ -348,14 +362,64 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
         """
         batch_size = image_resnet.shape[0]
 
+        # Encoder - body
         body_image_enc = image_resnet.view(batch_size, 2048, 1).expand(-1, -1, body_vertices_sub.shape[-1])
         x = torch.cat([body_vertices_sub, body_image_enc], dim=1)
-        x = self.body_encoder(x)
+        x = self.body_gc(x)
 
+
+        #x = x.transpose(1,2)
+        #x = x.reshape(batch_size, -1)
+        #xx = self.body_encoder(x)
+        #xxx = torch.sum(xx, dim=1)
+        #xxx1 = xxx.reshape(batch_size, 1, 1).expand(-1, 256, 256)
+        #xxx11 = xxx1.detach().cpu().numpy()
+        #fm = self.fm.unsqueeze(dim=0)
+        #fm1 = fm.detach().cpu().numpy()
+        #f = torch.mul(fm, xxx1)
+        #f1 = f.detach().cpu().numpy()
+
+
+
+        # Encoder - garment
         gar_ref_vertices = self.gar_ref_vertices.expand(batch_size, -1, -1)
         gar_image_enc = image_resnet.view(batch_size, 2048, 1).expand(-1, -1, gar_ref_vertices.shape[-1])
         y = torch.cat([gar_ref_vertices, gar_image_enc], dim=1)
         y = self.gar_gc(y)
-        gar_shape = self.gar_shape(y)
+
+        # Fusion network
+        x = x.transpose(1,2).reshape(batch_size, -1)
+        body_latent = self.body_encoder(x)
+        body_latent_sum = torch.sum(body_latent, dim=1).reshape(batch_size, 1, 1).expand(-1, 256, 256)
+        fusion_mat = self.fm.unsqueeze(dim=0)
+        fusion_body = torch.mul(fusion_mat, body_latent_sum)
+
+        gar_latent = self.gar_encoder(y.reshape(batch_size, -1))
+        gar_latent = gar_latent.unsqueeze(dim=-1)
+
+        fusion_body = fusion_body.transpose(1,2)
+        fusion_result = torch.matmul(fusion_body, gar_latent)
+        fusion_result = fusion_result.expand(-1, -1, gar_ref_vertices.shape[-1])
+
+        # Decoder
+        gar_shape = self.gar_shape(fusion_result)
+
+
+
+
+        #gar_shape = self.gar_shape(y)
+
+        #y1 = y.reshape(batch_size, -1)
+        #yy = self.gar_encoder(y1)
+        #yy1 = yy.detach().cpu().numpy()
+        #yy = yy.unsqueeze(dim=-1)
+        #yy2 = yy.detach().cpu().numpy()
+        #f = f.transpose(1,2)
+        #f1 = f.detach().cpu().numpy()
+        #r = torch.matmul(f, yy)
+        #r = r.reshape(batch_size, -1)
+        #r1 = r.detach().cpu().numpy()
+
+
 
         return gar_shape
