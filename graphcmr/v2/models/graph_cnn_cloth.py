@@ -316,7 +316,7 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
         self.body_gc = nn.Sequential(*body_layers)
 
         # 1723 is the number of vertices in the subsampled SMPL mesh
-        self.body_encoder = nn.Sequential(FCBlock(1723 * 256, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, 256))
+        self.body_encoder = nn.Sequential(FCBlock(1723 * num_channels, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, num_channels))
 
         # cloth encoder
         self.gar_ref_vertices = gar_mesh_sampler.ref_vertices.t()
@@ -327,9 +327,9 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
             gar_layers.append(GraphResBlock(num_channels, num_channels, self.gar_A))
         self.gar_gc = nn.Sequential(*gar_layers)
 
-        # 1723 is the number of vertices in the subsampled cloth mesh
-        self.gar_encoder = nn.Sequential(FCBlock(1062 * 256, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, 256))
-
+        # 1062 is the number of vertices in the subsampled cloth mesh
+        self.gar_encoder = nn.Sequential(FCBlock(1062 * num_channels, 1024), FCResBlock(1024, 1024), FCResBlock(1024, 1024), nn.Linear(1024, num_channels))
+        self.gar_decoder = nn.Sequential(FCBlock(num_channels, num_channels * 2), FCBlock(num_channels * 2, num_channels * 2), FCBlock(num_channels * 2, num_channels * 4), nn.Linear(num_channels * 4, 1062 * 3))
         # cloth decoder
         #self.gar_shape = nn.Sequential(GraphResBlock(num_channels, 64, self.gar_A),
         #                           GraphResBlock(64, 32, self.gar_A),
@@ -345,8 +345,8 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
                                    GraphLinear(32, 3),
                                    nn.Identity())
 
-        self.body_channels = 256
-        self.gar_channels = 256
+        self.body_channels = num_channels
+        self.gar_channels = num_channels
         # Fusion matrix
         self.fm = nn.Parameter(torch.FloatTensor(self.body_channels, self.gar_channels))
         w_stdv = 1 / (self.body_channels * self.gar_channels)
@@ -390,7 +390,7 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
         # Fusion network
         x = x.transpose(1,2).reshape(batch_size, -1)
         body_latent = self.body_encoder(x)
-        body_latent_sum = torch.sum(body_latent, dim=1).reshape(batch_size, 1, 1).expand(-1, 256, 256)
+        body_latent_sum = torch.sum(body_latent, dim=1).reshape(batch_size, 1, 1).expand(-1, self.body_channels, self.gar_channels)
         fusion_mat = self.fm.unsqueeze(dim=0)
         fusion_body = torch.mul(fusion_mat, body_latent_sum)
 
@@ -399,12 +399,14 @@ class ClothGraphConvNetwork_MLPDecoder_Fusion(nn.Module):
 
         fusion_body = fusion_body.transpose(1,2)
         fusion_result = torch.matmul(fusion_body, gar_latent)
-        fusion_result = fusion_result.expand(-1, -1, gar_ref_vertices.shape[-1])
 
         # Decoder
-        gar_shape = self.gar_shape(fusion_result)
+        #fusion_result = fusion_result.expand(-1, -1, gar_ref_vertices.shape[-1])
+        #gar_shape = self.gar_shape(fusion_result)
 
-
+        fusion_result = fusion_result.squeeze(dim=-1)
+        gar_shape = self.gar_decoder(fusion_result)
+        gar_shape = gar_shape.reshape(-1, 3, 1062)
 
 
         #gar_shape = self.gar_shape(y)
