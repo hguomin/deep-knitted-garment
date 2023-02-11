@@ -49,11 +49,15 @@ class ClothTrainer(BaseTrainer):
                            num_channels=self.options.num_channels,
                            num_layers=self.options.num_layers
                         ).to(self.device)
-        
-        self.cloth_gcn = ClothGraphConvNetwork_MLPDecoder_Fusion(self.mesh.adjmat, self.gar_mesh_sampler,
-                           num_channels=self.options.num_channels,
-                           num_layers=self.options.num_layers
-                        ).to(self.device)
+        if self.options.cloth_decoder == 'mlp':
+            self.cloth_gcn = ClothGraphConvNetwork_MLPDecoder(self.gar_mesh_sampler, num_layers=self.options.num_layers, num_channels=self.options.num_channels).to(self.device)
+        elif self.options.cloth_decoder == 'gcn':
+            self.cloth_gcn = ClothGraphConvNetwork(self.gar_mesh_sampler, num_layers=self.options.num_layers, num_channels=self.options.num_channels).to(self.device)
+        else:
+            self.cloth_gcn = ClothGraphConvNetwork_MLPDecoder_Fusion(self.mesh.adjmat, self.gar_mesh_sampler,
+                            num_channels=self.options.num_channels,
+                            num_layers=self.options.num_layers
+                            ).to(self.device)
 
         # SMPL Parameter regressor
         self.smpl_param_regressor = SMPLParamRegressor().to(self.device)
@@ -198,7 +202,13 @@ class ClothTrainer(BaseTrainer):
         # Guomin: use fusion networks to predict cloth mesh
         body_vertices_smpl = pred_vertices_smpl.detach()
         body_vertices_smpl_sub = self.mesh.downsample(body_vertices_smpl).transpose(1,2)
-        pred_gar_vertices_sub = self.cloth_gcn(images_resnet, body_vertices_smpl_sub, self.mesh.adjmat)
+
+        if self.options.cloth_decoder == 'mlp' or self.options.cloth_decoder == 'gcn':
+            pred_gar_vertices_sub = self.cloth_gcn(images_resnet)
+        else:
+            pred_gar_vertices_sub = self.cloth_gcn(images_resnet, body_vertices_smpl_sub, self.mesh.adjmat)
+
+
         pred_gar_vertices = self.gar_mesh_sampler.upsample(pred_gar_vertices_sub.transpose(1,2))
 
         # Get 3D and projected 2D keypoints from the regressed shape
@@ -276,7 +286,8 @@ class ClothTrainer(BaseTrainer):
             
             # Guomin: draw garment
             vertices_garment = pred_vertices_garment[i].cpu().numpy()
-            rend_img_garment = visualize_reconstructed_garment(rend_img, self.options.img_res, gt_keypoints_2d_, vertices_garment, self.gar_mesh_sampler.faces.cpu().numpy(), pred_keypoints_2d_smpl_, cam, self.renderer)
+            #rend_img_garment = visualize_reconstructed_garment(rend_img, self.options.img_res, gt_keypoints_2d_, vertices_garment, self.gar_mesh_sampler.faces.cpu().numpy(), pred_keypoints_2d_smpl_, cam, self.renderer)
+            rend_img_garment = visualize_reconstructed_garment(img, self.options.img_res, gt_keypoints_2d_, vertices_garment, self.gar_mesh_sampler.faces.cpu().numpy(), pred_keypoints_2d_smpl_, cam, self.renderer)
             rend_img_garment = rend_img_garment.transpose(2,0,1)
 
             rend_img = rend_img.transpose(2,0,1)

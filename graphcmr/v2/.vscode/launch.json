@@ -31,6 +31,30 @@
             ]
         },
         {
+            "name": "Train on BCNet dataset with mlp decoder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "bcnet_mlp_decoder_20230112", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet", "--cloth_decoder=mlp", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+            ]
+        },
+        {
+            "name": "Train on BCNet dataset with gcn decoder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "bcnet_gcn_decoder_20230113", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet", "--cloth_decoder=gcn", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+            ]
+        },
+        {
             "name": "Python: Preprocess datasets for training",
             "type": "python",
             "request": "launch",

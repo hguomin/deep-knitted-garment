@@ -59,7 +59,8 @@ class TrainOptions(object):
         # Guomin for deep knitted garment
         garment = self.parser.add_argument_group('Garment')
         garment.add_argument('--garment', default='shirts', choices=['shirts', 'pants'], help='Garment types')
-        
+        garment.add_argument('--cloth_decoder', default='mlp', choices=['gcn', 'mlp', 'fusion'], help='The decoder for cloth network')
+
         return 
 
     def parse_args(self):
