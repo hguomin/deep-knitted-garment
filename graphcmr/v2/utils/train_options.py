@@ -36,7 +36,7 @@ class TrainOptions(object):
         arch.add_argument('--img_res', type=int, default=224, help='Rescale bounding boxes to size [img_res, img_res] before feeding it in the network') 
 
         train = self.parser.add_argument_group('Training Options')
-        train.add_argument('--dataset', default='itw', choices=['itw', 'all', 'bcnet'], help='Choose training dataset') # Guomin
+        train.add_argument('--dataset', default='itw', choices=['itw', 'all', 'bcnet', 'bcnet_shirts', 'bcnet_short_shirts', 'bcnet_skirts',  'bcnet_short_skirts'], help='Choose training dataset') # Guomin
         train.add_argument('--num_epochs', type=int, default=50, help='Total number of training epochs')
         train.add_argument('--batch_size', type=int, default=16, help='Batch size')
         train.add_argument('--summary_steps', type=int, default=100, help='Summary saving frequency')
@@ -58,7 +58,7 @@ class TrainOptions(object):
 
         # Guomin for deep knitted garment
         garment = self.parser.add_argument_group('Garment')
-        garment.add_argument('--garment', default='shirts', choices=['shirts', 'pants'], help='Garment types')
+        garment.add_argument('--garment', default='shirts', choices=['shirts', 'short_shirts', 'skirts',  'short_skirts', 'pants'], help='Garment types')
         garment.add_argument('--cloth_decoder', default='mlp', choices=['gcn', 'mlp', 'fusion'], help='The decoder for cloth network')
 
         return 

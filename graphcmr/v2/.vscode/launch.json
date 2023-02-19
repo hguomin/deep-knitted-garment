@@ -26,7 +26,7 @@
             "justMyCode": true,
             "args": [
                 "--name", "bcnet_train_221107", "--num_layers=5", 
-                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=128", "--dataset=bcnet", "--batch_size=16",
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=128", "--dataset=bcnet_shirts", "--batch_size=16",
                 "--pretrained_checkpoint=logs/bcnet_train_221107/checkpoints/2022_11_12-12_45_25.pt"
             ]
         },
@@ -39,7 +39,7 @@
             "justMyCode": true,
             "args": [
                 "--name", "bcnet_mlp_decoder_20230112", "--num_layers=5", 
-                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet", "--cloth_decoder=mlp", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet_shirts", "--cloth_decoder=mlp", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
             ]
         },
         {
@@ -51,7 +51,31 @@
             "justMyCode": true,
             "args": [
                 "--name", "bcnet_gcn_decoder_20230113", "--num_layers=5", 
-                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet", "--cloth_decoder=gcn", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet_shirts", "--cloth_decoder=gcn", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+            ]
+        },
+        {
+            "name": "Train on bcnet_short_shirts dataset with gcn decoder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "bcnet_short_shirts_gcn_20230217", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet_short_shirts", "--garment=short_shirts", "--cloth_decoder=gcn", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
+            ]
+        },
+        {
+            "name": "Train on bcnet_skirts dataset with gcn decoder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--name", "bcnet_skirts_gcn_20230216", "--num_layers=5", 
+                "--img_res=224", "--rot_factor=30", "--scale_factor=0.25", "--num_channels=256", "--dataset=bcnet_skirts", "--garment=skirts", "--cloth_decoder=gcn", "--batch_size=16", "--num_epochs=20", "--num_workers=6"
             ]
         },
         {

@@ -92,7 +92,7 @@ def bcnet_extract(dataset_path, out_path, gar_style):
     if not osp.isdir(extra_path):
         os.makedirs(extra_path)
 
-    np.savez(osp.join(extra_path, 'bcnet_train_val.npz'),
+    np.savez(osp.join(extra_path, f'bcnet_train_val_{gar_style}.npz'),
             img_ids=imgs,
             imgname=imgs_name_list,
             center=centers_list,
@@ -108,7 +108,8 @@ def bcnet_extract(dataset_path, out_path, gar_style):
     print(ss)
 
 def main_test():
-    bcnet_extract('/home/guomin/datadisk/Projects/Research/BCNet/body_garment_dataset', './datasets', 'shirts')
+    # bcnet_extract('/home/guomin/datadisk/Projects/Research/BCNet/body_garment_dataset', './datasets', 'shirts')
+    bcnet_extract('/home/guomin/datadisk/Projects/Research/BCNet/body_garment_dataset', './datasets', 'short_skirts')
 
 if __name__ == '__main__':
     main_test()

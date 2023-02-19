@@ -35,7 +35,7 @@ class ClothTrainer(BaseTrainer):
         self.faces = self.mesh.faces.to(self.device)
 
         data_dir = self.train_ds.ds.img_dir
-        if self.options.dataset == 'bcnet':
+        if self.options.dataset.find('bcnet') == 0:
             gar_temp_file = osp.join(data_dir, 'tmps', self.options.garment, 'garment_tmp.obj')
             gar_sampling_params_file = osp.join(data_dir, 'tmps', self.options.garment, 'garment_mesh_sampling.npz')
             gar_mesh = trimesh.load(gar_temp_file)

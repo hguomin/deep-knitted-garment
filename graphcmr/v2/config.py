@@ -23,14 +23,20 @@ DATASET_FILES = [ {'h36m-p1': join(DATASET_NPZ_PATH, 'extras', 'h36m_valid_proto
                    'h36m-p2': join(DATASET_NPZ_PATH,'extras', 'h36m_valid_protocol2.npz'),
                    'lsp': join(DATASET_NPZ_PATH, 'extras', 'lsp_dataset_test.npz'),
                    'up-3d': join(DATASET_NPZ_PATH, 'extras', 'up_3d_lsp_test.npz'),
-                   'bcnet': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val.npz')
+                   'bcnet_shirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_shirts.npz'),
+                   'bcnet_short_shirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_short_shirts.npz'),
+                   'bcnet_skirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_skirts.npz'),
+                   'bcnet_short_skirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_short_skirts.npz')
                   },
 
                   {'lsp-orig': join(DATASET_NPZ_PATH, 'extras', 'lsp_dataset_original_train.npz'),
                    'up-3d': join(DATASET_NPZ_PATH, 'extras', 'up_3d_trainval.npz'),
                    'mpii': join(DATASET_NPZ_PATH, 'extras', 'mpii_train.npz'),
                    'coco': join(DATASET_NPZ_PATH, 'extras', 'coco_2014_train.npz'),
-                   'bcnet': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val.npz')
+                   'bcnet_shirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_shirts.npz'),
+                   'bcnet_short_shirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_short_shirts.npz'),
+                   'bcnet_skirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_skirts.npz'),
+                   'bcnet_short_skirts': join(DATASET_NPZ_PATH, 'extras', 'bcnet_train_val_short_skirts.npz')
                   }
                 ]
 
@@ -42,7 +48,11 @@ DATASET_FOLDERS = {'h36m-p1': H36M_ROOT,
                  'up-3d': UP_3D_ROOT,
                  'mpii': MPII_ROOT,
                  'coco': COCO_ROOT,
-                 'bcnet': BCNET_ROOT 
+                 'bcnet': BCNET_ROOT,
+                  'bcnet_shirts': BCNET_ROOT,
+                  'bcnet_short_shirts': BCNET_ROOT,
+                  'bcnet_skirts': BCNET_ROOT,
+                  'bcnet_short_skirts': BCNET_ROOT
                 }
 
 CUBE_PARTS_FILE = 'data/cube_parts.npy'

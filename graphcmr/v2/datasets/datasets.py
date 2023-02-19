@@ -80,7 +80,7 @@ def create_dataset(dataset, options):
         return FullDataset(options)
     elif dataset == 'itw':
         return ITWDataset(options)
-    elif dataset == 'bcnet':
+    elif dataset.find('bcnet') == 0:  #dataset == 'bcnet':
         return BCNetDataset(options)
     else:
         raise ValueError('Unknown dataset')
